@@ -79,6 +79,7 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 			color: "white",
 			paddingTop: 7,
 			paddingBottom: 7,
+			alignItems: "center",
 		},
 		recap: {
 			row: {
@@ -295,7 +296,7 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 		installment: Installment;
 	}): React.ReactElement => (
 		<View style={styles.recapBox}>
-			<View style={styles.recap.row}>
+			<View style={{ ...styles.recap.row, marginTop: 12 }}>
 				<Text style={styles.recap.label}>Totale prodotti e servizi</Text>
 				<Text style={styles.recap.value}>
 					{installment.taxSummary.paymentAmount.toLocaleString(locale)}
@@ -309,13 +310,19 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 					{currencySymbol(installment.currency)}
 				</Text>
 			</View>
-			<View style={styles.recap.row}>
+			<View
+				style={{
+					...styles.recap.row,
+					marginBottom: 20,
+					alignItems: "flex-end",
+				}}
+			>
 				<Text style={styles.recap.label}>
 					<Text style={{ fontFamily: "Helvetica-Bold", fontSize: 12 }}>
 						Totale
 					</Text>
 				</Text>
-				<Text style={[styles.recap.value, { fontSize: 11 }]}>
+				<Text style={[styles.recap.value, { fontSize: 21, lineHeight: 1 }]}>
 					{installment.totalAmount.toLocaleString(locale)}
 					{currencySymbol(installment.currency)}
 				</Text>
@@ -373,33 +380,6 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 									key={line.number}
 								/>
 							))}
-							<View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-								<View style={{ width: "50%" }}>
-									{installment.stampDuty && (
-										<React.Fragment>
-											<Text style={[styles.title, { marginTop: 10 }]}>
-												Imposta di bollo
-											</Text>
-											<Text style={{ color: colors.lighterText }}>
-												{installment.stampDuty.toLocaleString(locale)}
-												{currencySymbol(installment.currency)}
-											</Text>
-										</React.Fragment>
-									)}
-									{installment.payment && (
-										<React.Fragment>
-											<Text style={[styles.title, { marginTop: 10 }]}>
-												Dettagli pagamento
-											</Text>
-											<Payment
-												payment={installment.payment}
-												currency={currencySymbol(installment.currency)}
-											/>
-										</React.Fragment>
-									)}
-								</View>
-								<Recap installment={installment} />
-							</View>
 							{installment.attachments && (
 								<React.Fragment>
 									<Text style={[styles.title, { marginTop: 15 }]}>
@@ -423,6 +403,40 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 									))}
 								</React.Fragment>
 							)}
+						</View>
+						<View
+							style={{
+								flexDirection: "row",
+								alignItems: "flex-end",
+								marginTop: "auto",
+								marginBottom: 20,
+							}}
+						>
+							<View style={{ width: "50%" }}>
+								{installment.stampDuty && (
+									<React.Fragment>
+										<Text style={[styles.title, { marginTop: 10 }]}>
+											Imposta di bollo
+										</Text>
+										<Text style={{ color: colors.lighterText }}>
+											{installment.stampDuty.toLocaleString(locale)}
+											{currencySymbol(installment.currency)}
+										</Text>
+									</React.Fragment>
+								)}
+								{installment.payment && (
+									<React.Fragment>
+										<Text style={[styles.title, { marginTop: 10 }]}>
+											Dettagli pagamento
+										</Text>
+										<Payment
+											payment={installment.payment}
+											currency={currencySymbol(installment.currency)}
+										/>
+									</React.Fragment>
+								)}
+							</View>
+							<Recap installment={installment} />
 						</View>
 						{options.footer && (
 							<View
