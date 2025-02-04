@@ -225,33 +225,6 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 		</View>
 	);
 
-	const StampDutyLine = ({
-		amount,
-		currency,
-	}: {
-		amount: number;
-		currency: string;
-	}): React.ReactElement => (
-		<View style={styles.lineRow}>
-			<Text style={[styles.line, styles.tableFormat[0]]}>-</Text>
-			<Text style={[styles.line, styles.tableFormat[1]]}>Imposta di bollo</Text>
-			<Text style={[styles.line, styles.numbers, styles.tableFormat[2]]}>
-				1
-			</Text>
-			<Text style={[styles.line, styles.numbers, styles.tableFormat[3]]}>
-				{amount.toLocaleString(locale)}
-				{currencySymbol(currency)}
-			</Text>
-			<Text style={[styles.line, styles.numbers, styles.tableFormat[4]]}>
-				{amount.toLocaleString(locale)}
-				{currencySymbol(currency)}
-			</Text>
-			<Text style={[styles.line, styles.numbers, styles.tableFormat[5]]}>
-				0%
-			</Text>
-		</View>
-	);
-
 	const InvoiceData = ({
 		number,
 		issueDate,
@@ -400,14 +373,19 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 									key={line.number}
 								/>
 							))}
-							{installment.stampDuty && (
-								<StampDutyLine
-									amount={installment.stampDuty}
-									currency={installment.currency}
-								/>
-							)}
 							<View style={{ flexDirection: "row", alignItems: "flex-start" }}>
 								<View style={{ width: "50%" }}>
+									{installment.stampDuty && (
+										<React.Fragment>
+											<Text style={[styles.title, { marginTop: 10 }]}>
+												Imposta di bollo
+											</Text>
+											<Text style={{ color: colors.lighterText }}>
+												{installment.stampDuty.toLocaleString(locale)}
+												{currencySymbol(installment.currency)}
+											</Text>
+										</React.Fragment>
+									)}
 									{installment.payment && (
 										<React.Fragment>
 											<Text style={[styles.title, { marginTop: 10 }]}>
@@ -460,7 +438,7 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 									Fattura digitale generata da{" "}
 									<Link
 										style={{ color: colors.primary }}
-										src="https://makhbeth.framer.website/"
+										src="mailto:davide.dipumpo@gmail.com"
 									>
 										Davide Di Pumpo
 									</Link>
