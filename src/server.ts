@@ -1,3 +1,4 @@
+import Fastify from "fastify";
 import * as xml2jsSource from "xml2js";
 import { stripPrefix, parseNumbers } from "xml2js/lib/processors";
 import ReactPDF from "@react-pdf/renderer";
@@ -6,6 +7,14 @@ import GeneratePDF from "./renderer";
 import dataExtractor from "./dataExtractor";
 import type { InvoiceJSON } from "./types/DigitalInvoiceJson";
 import type { Options } from "./types/Options";
+import fastifyMultipart from "@fastify/multipart";
+
+const fastify = Fastify({
+	logger: true,
+});
+
+// Register multipart support
+fastify.register(fastifyMultipart);
 
 const xml2jsPromise = promisify<
 	xml2jsSource.convertableToString,
@@ -57,4 +66,45 @@ const xmlToPDF = async (xml: string, options = defaultOptions) => {
 	}
 };
 
-export { xmlToJson, xmlToCompactJson, xmlToPDF };
+// Convert XML file to PDF endpoint
+fastify.post("/convert", async (request, reply) => {
+	try {
+		const data = await request.file();
+		if (!data) {
+			reply.code(400);
+			throw new Error("No file uploaded");
+		}
+
+		const xmlContent = await data.toBuffer();
+		const pdfStream = await xmlToPDF(xmlContent.toString(), defaultOptions);
+
+		reply
+			.header("Content-Type", "application/pdf")
+			.header("Content-Disposition", "attachment; filename=invoice.pdf");
+
+		return pdfStream;
+	} catch (error: any) {
+		throw new Error(`Failed to convert XML to PDF: ${error.message}`);
+	}
+});
+
+// Health check endpoint
+fastify.get("/health", async () => {
+	return { status: "ok" };
+});
+
+// Start the server
+const start = async () => {
+	try {
+		await fastify.listen({
+			port: 3000,
+			host: "0.0.0.0",
+			listenTextResolver: () => `Server listening at http://localhost:3000`, // Optional but recommended
+		});
+	} catch (err) {
+		fastify.log.error(err);
+		process.exit(1);
+	}
+};
+
+start();

@@ -1,6 +1,6 @@
-import { Colors } from './Colors'
+import { Colors } from './Colors';
 export interface Options {
-  colors?: Colors
-  footer?: boolean
-  locale?: string
+    colors?: Colors;
+    footer?: boolean;
+    locale?: string;
 }
