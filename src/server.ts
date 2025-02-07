@@ -75,16 +75,32 @@ fastify.post("/convert", async (request, reply) => {
 			throw new Error("No file uploaded");
 		}
 
+		// Get language from query parameter, default to Italian
+		const lang = (request.query as { lang?: string })?.lang || "it";
+
+		// Validate language
+		if (lang !== "it" && lang !== "de") {
+			reply.code(400);
+			throw new Error("Invalid language. Supported languages are: it, de");
+		}
+
+		const options = {
+			...defaultOptions,
+			locale: lang,
+		};
+
 		const xmlContent = await data.toBuffer();
-		const pdfStream = await xmlToPDF(xmlContent.toString(), defaultOptions);
+		const pdfStream = await xmlToPDF(xmlContent.toString(), options);
 
 		reply
 			.header("Content-Type", "application/pdf")
 			.header("Content-Disposition", "attachment; filename=invoice.pdf");
 
 		return pdfStream;
-	} catch (error: any) {
-		throw new Error(`Failed to convert XML to PDF: ${error.message}`);
+	} catch (error: unknown) {
+		const errorMessage =
+			error instanceof Error ? error.message : "Unknown error";
+		throw new Error(`Failed to convert XML to PDF: ${errorMessage}`);
 	}
 });
 

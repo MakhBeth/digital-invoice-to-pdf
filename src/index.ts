@@ -14,7 +14,7 @@ const xml2jsPromise = promisify<
 >(xml2jsSource.parseString);
 
 const defaultOptions: Options = {
-	locale: "it-IT",
+	locale: "it",
 	footer: true,
 	colors: {},
 };

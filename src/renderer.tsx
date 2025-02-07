@@ -17,6 +17,7 @@ import {
 } from "@react-pdf/renderer";
 import type { Options } from "./types/Options";
 import { oc } from "ts-optchain";
+import translations from "./translations.json";
 
 // Create Document Component
 const GeneratePDF = (invoice: Invoice, options: Options) => {
@@ -34,7 +35,8 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 		tableHeader: ocColors.tableHeader("#D1D9DC"),
 	};
 
-	const locale = options.locale || "it-IT";
+	const locale = options.locale || "it";
+	const t = translations[locale as keyof typeof translations];
 
 	// Create styles
 	const styles = StyleSheet.create({
@@ -188,12 +190,12 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 
 	const LineHeader = (): React.ReactElement => (
 		<View style={styles.lineHeader}>
-			<Text style={[styles.line, styles.tableFormat[0]]}>Numero</Text>
-			<Text style={[styles.line, styles.tableFormat[1]]}>Descrizione</Text>
-			<Text style={[styles.line, styles.tableFormat[2]]}>Quantità</Text>
-			<Text style={[styles.line, styles.tableFormat[3]]}>Prezzo</Text>
-			<Text style={[styles.line, styles.tableFormat[4]]}>Importo</Text>
-			<Text style={[styles.line, styles.tableFormat[5]]}>IVA</Text>
+			<Text style={[styles.line, styles.tableFormat[0]]}>{t.lineNumber}</Text>
+			<Text style={[styles.line, styles.tableFormat[1]]}>{t.description}</Text>
+			<Text style={[styles.line, styles.tableFormat[2]]}>{t.quantity}</Text>
+			<Text style={[styles.line, styles.tableFormat[3]]}>{t.price}</Text>
+			<Text style={[styles.line, styles.tableFormat[4]]}>{t.total}</Text>
+			<Text style={[styles.line, styles.tableFormat[5]]}>{t.vat}</Text>
 		</View>
 	);
 
@@ -235,10 +237,10 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 	}): React.ReactElement => (
 		<View style={{ textAlign: "right", marginTop: 10 }}>
 			<Text style={styles.invoiceData}>
-				<Text style={{ fontSize: 10 }}>numero:</Text> {number}
+				<Text style={{ fontSize: 10 }}>{t.number}:</Text> {number}
 			</Text>
 			<Text style={styles.invoiceData}>
-				<Text style={{ fontSize: 10 }}>data:</Text>{" "}
+				<Text style={{ fontSize: 10 }}>{t.date}:</Text>{" "}
 				{issueDate.toLocaleDateString(locale, {
 					day: "2-digit",
 					month: "2-digit",
@@ -258,12 +260,16 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 		<View style={{ lineHeight: 1.5, color: colors.lighterText }}>
 			{payment.method && (
 				<View>
-					<Text>Metodo di pagamento: {payment.method}</Text>
+					<Text>
+						{t.paymentMethod}: {payment.method}
+					</Text>
 				</View>
 			)}
 			{payment.bank && (
 				<View>
-					<Text>Banca: {payment.bank}</Text>
+					<Text>
+						{t.bank}: {payment.bank}
+					</Text>
 				</View>
 			)}
 			<View>
@@ -272,7 +278,7 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 			{payment.regularPaymentDate && (
 				<View>
 					<Text>
-						Scadenza:{" "}
+						{t.dueDate}:{" "}
 						{payment.regularPaymentDate.toLocaleDateString(locale, {
 							day: "2-digit",
 							month: "2-digit",
@@ -283,7 +289,7 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 			)}
 			<View>
 				<Text>
-					Importo: {payment.amount.toLocaleString(locale)}
+					{t.amount}: {payment.amount.toLocaleString(locale)}
 					{currency}
 				</Text>
 			</View>
@@ -297,14 +303,14 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 	}): React.ReactElement => (
 		<View style={styles.recapBox}>
 			<View style={{ ...styles.recap.row, marginTop: 12 }}>
-				<Text style={styles.recap.label}>Totale prodotti e servizi</Text>
+				<Text style={styles.recap.label}>{t.totalProductsServices}</Text>
 				<Text style={styles.recap.value}>
 					{installment.taxSummary.paymentAmount.toLocaleString(locale)}
 					{currencySymbol(installment.currency)}
 				</Text>
 			</View>
 			<View style={styles.recap.row}>
-				<Text style={styles.recap.label}>Totale IVA</Text>
+				<Text style={styles.recap.label}>{t.totalVat}</Text>
 				<Text style={styles.recap.value}>
 					{installment.taxSummary.taxAmount.toLocaleString(locale)}
 					{currencySymbol(installment.currency)}
@@ -319,7 +325,7 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 			>
 				<Text style={styles.recap.label}>
 					<Text style={{ fontFamily: "Helvetica-Bold", fontSize: 12 }}>
-						Totale
+						{t.total}
 					</Text>
 				</Text>
 				<Text style={[styles.recap.value, { fontSize: 21, lineHeight: 1 }]}>
@@ -333,7 +339,11 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 	return (
 		<Document>
 			{invoice.installments.map((installment, index: number) => (
-				<Page size="A4" style={styles.page} key={index}>
+				<Page
+					size="A4"
+					style={styles.page}
+					key={`installment-${installment.number}`}
+				>
 					<View
 						style={{
 							paddingLeft: 30,
@@ -357,21 +367,21 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 								issueDate={installment.issueDate}
 							/>
 							<View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-								<Company company={invoice.invoicer} role="Dati fornitore" />
-								<Company company={invoice.invoicee} role="Dati cliente" />
+								<Company company={invoice.invoicer} role={t.supplier} />
+								<Company company={invoice.invoicee} role={t.customer} />
 								{invoice.thirdParty && (
-									<Company company={invoice.thirdParty} role="Intermediario" />
+									<Company company={invoice.thirdParty} role={t.intermediary} />
 								)}
 							</View>
 							{installment.description && (
 								<React.Fragment>
 									<HR />
-									<Text style={styles.title}>Causale</Text>
+									<Text style={styles.title}>{t.cause}</Text>
 									<Text>{installment.description}</Text>
 								</React.Fragment>
 							)}
 							<HR />
-							<Text style={styles.title}>Prodotti e servizi</Text>
+							<Text style={styles.title}>{t.productsAndServices}</Text>
 							<LineHeader />
 							{installment.lines.map((line) => (
 								<Line
@@ -383,16 +393,21 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 							{installment.attachments && (
 								<React.Fragment>
 									<Text style={[styles.title, { marginTop: 15 }]}>
-										Documenti allegati
+										{t.attachedDocs}
 									</Text>
 									<View style={styles.lineHeader}>
-										<Text style={[styles.line, { width: "50%" }]}>Nome</Text>
 										<Text style={[styles.line, { width: "50%" }]}>
-											Descrizione
+											{t.name}
+										</Text>
+										<Text style={[styles.line, { width: "50%" }]}>
+											{t.description}
 										</Text>
 									</View>
 									{installment.attachments.map((attachment, i) => (
-										<View style={styles.lineRow} key={i}>
+										<View
+											style={styles.lineRow}
+											key={`attachment-${attachment.name}`}
+										>
 											<Text style={[styles.line, { width: "50%" }]}>
 												{attachment.name}
 											</Text>
@@ -416,7 +431,7 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 								{installment.stampDuty && (
 									<React.Fragment>
 										<Text style={[styles.title, { marginTop: 10 }]}>
-											Imposta di bollo
+											{t.stampDuty}
 										</Text>
 										<Text style={{ color: colors.lighterText }}>
 											{installment.stampDuty.toLocaleString(locale)}
@@ -427,7 +442,7 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 								{installment.payment && (
 									<React.Fragment>
 										<Text style={[styles.title, { marginTop: 10 }]}>
-											Dettagli pagamento
+											{t.paymentDetails}
 										</Text>
 										<Payment
 											payment={installment.payment}
@@ -449,7 +464,7 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 								}}
 							>
 								<Text>
-									Fattura digitale generata da{" "}
+									{t.generatedBy}
 									<Link
 										style={{ color: colors.primary }}
 										src="mailto:davide.dipumpo@gmail.com"
