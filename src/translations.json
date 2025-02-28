@@ -23,7 +23,9 @@
 		"paymentDetails": "Dettagli pagamento",
 		"totalProductsServices": "Totale prodotti e servizi",
 		"totalVat": "Totale IVA",
-		"generatedBy": "Fattura digitale generata da"
+		"generatedBy": "Fattura digitale generata da",
+		"vatNumber": "P. IVA",
+		"telephone": "tel:"
 	},
 	"de": {
 		"supplier": "Lieferantendaten",
@@ -49,6 +51,8 @@
 		"paymentDetails": "Zahlungsdetails",
 		"totalProductsServices": "Summe Produkte und Dienstleistungen",
 		"totalVat": "MwSt Gesamt",
-		"generatedBy": "Digitale Rechnung generiert von "
+		"generatedBy": "Digitale Rechnung generiert von ",
+		"vatNumber": "USt-IdNr.",
+		"telephone": "Tel:"
 	}
 }

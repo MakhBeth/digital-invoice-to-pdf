@@ -14,10 +14,12 @@ import {
 	StyleSheet,
 	Font,
 	Link,
+	Image,
 } from "@react-pdf/renderer";
 import type { Options } from "./types/Options";
 import { oc } from "ts-optchain";
 import translations from "./translations.json";
+import fs from 'fs';
 
 // Create Document Component
 const GeneratePDF = (invoice: Invoice, options: Options) => {
@@ -154,7 +156,9 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 				<Text style={{ fontSize: 12, color: colors.primary }}>
 					{company.name}
 				</Text>
-				<Text style={styles.companyLine}>P. IVA: {company.vat}</Text>
+				<Text style={styles.companyLine}>
+					{t.vatNumber}: {company.vat}
+				</Text>
 				{office && (
 					<React.Fragment>
 						<Text style={styles.companyLine}>
@@ -168,7 +172,9 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 				{contacts && (
 					<React.Fragment>
 						{contacts.tel && (
-							<Text style={styles.companyLine}>tel: {contacts.tel}</Text>
+							<Text style={styles.companyLine}>
+								{t.telephone} {contacts.tel}
+							</Text>
 						)}
 						<Text style={styles.companyLine}>{contacts.email}</Text>
 					</React.Fragment>
@@ -336,6 +342,10 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 		</View>
 	);
 
+	const imagePath = `${__dirname}/assets/panda.png`;
+	const imageBase64 = fs.readFileSync(imagePath, 'base64');
+	const imageSrc = `data:image/png;base64,${imageBase64}`;
+
 	return (
 		<Document>
 			{invoice.installments.map((installment, index: number) => (
@@ -367,6 +377,10 @@ const GeneratePDF = (invoice: Invoice, options: Options) => {
 								issueDate={installment.issueDate}
 							/>
 							<View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+								<Image
+									style={{ width: 70, height: 70, marginTop: 0, marginRight: 10 }}
+									src={imageSrc}
+								/>
 								<Company company={invoice.invoicer} role={t.supplier} />
 								<Company company={invoice.invoicee} role={t.customer} />
 								{invoice.thirdParty && (
